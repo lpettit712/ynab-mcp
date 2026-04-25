@@ -45,9 +45,6 @@ def _outflow_amount_value(item: dict[str, Any]) -> Decimal:
     amount = _amount_milliunits(item)
     if amount >= 0:
         return Decimal("0")
-    currency = item.get("amount_currency")
-    if currency is not None:
-        return abs(Decimal(str(currency)))
     return abs(Decimal(amount) / Decimal("1000"))
 
 

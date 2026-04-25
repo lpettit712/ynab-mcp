@@ -114,19 +114,19 @@ def test_daily_checkin_summary_filters_accounts_categories_and_transactions():
 
 def test_spending_by_category_summary_groups_outflows_only():
     transactions = [
-        {"category_name": "Groceries", "amount": -2500, "amount_currency": -25.0},
-        {"category_name": "Groceries", "amount": -500, "amount_currency": -5.0},
-        {"category_name": "Income", "amount": 100000, "amount_currency": 1000.0},
+        {"category_name": "Groceries", "amount": -2500},
+        {"category_name": "Groceries", "amount": -500},
+        {"category_name": "Income", "amount": 100000},
         {"category_name": None, "amount": -750},
     ]
 
     summary = spending_by_category_summary(transactions)
 
     assert summary["groups"] == [
-        {"category": "Groceries", "amount": "30.00", "transaction_count": 2},
+        {"category": "Groceries", "amount": "3.00", "transaction_count": 2},
         {"category": "Uncategorized", "amount": "0.75", "transaction_count": 1},
     ]
-    assert summary["total_spent"] == "30.75"
+    assert summary["total_spent"] == "3.75"
 
 
 def test_spending_by_payee_summary_groups_outflows_only():
