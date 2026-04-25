@@ -139,9 +139,9 @@ def test_spending_by_payee_summary_groups_outflows_only():
     summary = spending_by_payee_summary(transactions)
 
     assert summary["groups"] == [
-        {"payee": "Market", "amount": "30.00", "transaction_count": 2}
+        {"payee": "Market", "amount": "3.00", "transaction_count": 2}
     ]
-    assert summary["total_spent"] == "30.00"
+    assert summary["total_spent"] == "3.00"
 
 
 def test_largest_transactions_summary_sorts_largest_outflows():

@@ -41,21 +41,14 @@ def _format_decimal_amount(amount: Decimal) -> str:
     return str(amount.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
 
 
-def _outflow_amount_value(
-    item: dict[str, Any], *, small_raw_amounts_as_cents: bool = False
-) -> Decimal:
+def _outflow_amount_value(item: dict[str, Any]) -> Decimal:
     amount = _amount_milliunits(item)
     if amount >= 0:
         return Decimal("0")
     currency = item.get("amount_currency")
     if currency is not None:
         return abs(Decimal(str(currency)))
-    divisor = (
-        Decimal("100")
-        if small_raw_amounts_as_cents and abs(amount) < 10_000
-        else Decimal("1000")
-    )
-    return abs(Decimal(amount) / divisor)
+    return abs(Decimal(amount) / Decimal("1000"))
 
 
 def daily_checkin_summary(
@@ -140,7 +133,7 @@ def spending_by_payee_summary(transactions: Iterable[dict[str, Any]]) -> dict[st
     totals: dict[str, Decimal] = defaultdict(Decimal)
     counts: dict[str, int] = defaultdict(int)
     for transaction in transactions:
-        amount = _outflow_amount_value(transaction, small_raw_amounts_as_cents=True)
+        amount = _outflow_amount_value(transaction)
         if amount == 0:
             continue
         key = transaction.get("payee_name") or "Unknown"
