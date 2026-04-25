@@ -123,7 +123,10 @@ def spending_by_category_summary(transactions: Iterable[dict[str, Any]]) -> dict
         }
         for key, total in sorted(totals.items(), key=lambda item: item[1], reverse=True)
     ]
-    return {"groups": groups, "total_spent": _format_decimal_amount(sum(totals.values()))}
+    return {
+        "groups": groups,
+        "total_spent": _format_decimal_amount(sum(totals.values(), Decimal("0"))),
+    }
 
 
 def spending_by_payee_summary(transactions: Iterable[dict[str, Any]]) -> dict[str, Any]:
@@ -144,7 +147,10 @@ def spending_by_payee_summary(transactions: Iterable[dict[str, Any]]) -> dict[st
         }
         for key, total in sorted(totals.items(), key=lambda item: item[1], reverse=True)
     ]
-    return {"groups": groups, "total_spent": _format_decimal_amount(sum(totals.values()))}
+    return {
+        "groups": groups,
+        "total_spent": _format_decimal_amount(sum(totals.values(), Decimal("0"))),
+    }
 
 
 def largest_transactions_summary(

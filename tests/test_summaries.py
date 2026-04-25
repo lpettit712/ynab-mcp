@@ -129,6 +129,10 @@ def test_spending_by_category_summary_groups_outflows_only():
     assert summary["total_spent"] == "3.75"
 
 
+def test_spending_by_category_summary_handles_no_transactions():
+    assert spending_by_category_summary([]) == {"groups": [], "total_spent": "0.00"}
+
+
 def test_spending_by_payee_summary_groups_outflows_only():
     transactions = [
         {"payee_name": "Market", "amount": -2500},
@@ -142,6 +146,17 @@ def test_spending_by_payee_summary_groups_outflows_only():
         {"payee": "Market", "amount": "3.00", "transaction_count": 2}
     ]
     assert summary["total_spent"] == "3.00"
+
+
+def test_spending_by_payee_summary_handles_income_only():
+    transactions = [
+        {"payee_name": "Employer", "category_name": "Income", "amount": 100000}
+    ]
+
+    assert spending_by_payee_summary(transactions) == {
+        "groups": [],
+        "total_spent": "0.00",
+    }
 
 
 def test_largest_transactions_summary_sorts_largest_outflows():
