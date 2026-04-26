@@ -72,3 +72,28 @@ def test_tool_error_for_rate_limit(monkeypatch):
             "message": "Too many requests",
         }
     }
+
+
+def test_daily_checkin_tool_combines_accounts_categories_and_transactions(monkeypatch):
+    monkeypatch.setattr(server, "_client", lambda: FakeClient())
+
+    summary = server.daily_checkin()
+
+    assert summary["accounts"] == [{"name": "Checking", "type": None, "balance": "1.00", "on_budget": False}]
+    assert summary["recent_transactions"] == [
+        {"date": "2026-04-25", "payee": "Unknown", "category": "Uncategorized", "amount": "-1.20"}
+    ]
+
+
+def test_spending_summary_tools_use_transactions(monkeypatch):
+    monkeypatch.setattr(server, "_client", lambda: FakeClient())
+
+    assert server.spending_by_category()["groups"] == [
+        {"category": "Uncategorized", "amount": "1.20", "transaction_count": 1}
+    ]
+    assert server.spending_by_payee()["groups"] == [
+        {"payee": "Unknown", "amount": "1.20", "transaction_count": 1}
+    ]
+    assert server.largest_transactions(limit=1)["transactions"] == [
+        {"date": "2026-04-25", "payee": "Unknown", "category": "Uncategorized", "amount": "1.20"}
+    ]

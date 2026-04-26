@@ -7,7 +7,13 @@ from typing import Any
 from fastmcp import FastMCP
 
 from ynab_mcp.config import SettingsError
-from ynab_mcp.summaries import current_month
+from ynab_mcp.summaries import (
+    current_month,
+    daily_checkin_summary,
+    largest_transactions_summary,
+    spending_by_category_summary,
+    spending_by_payee_summary,
+)
 from ynab_mcp.ynab_client import YnabApiError, YnabClient
 
 
@@ -118,6 +124,73 @@ def list_payees(plan_id: str = "default") -> dict[str, Any]:
     def run() -> dict[str, Any]:
         with _client() as client:
             return {"payees": client.list_payees(plan_id)}
+
+    return _tool_call(run)
+
+
+@mcp.tool
+def daily_checkin(plan_id: str = "default") -> dict[str, Any]:
+    """Summarize current account balances, category risk, and recent activity."""
+
+    def run() -> dict[str, Any]:
+        start_date, end_date = _current_month_window()
+        with _client() as client:
+            accounts = client.list_accounts(plan_id)
+            categories = client.list_categories(plan_id, current_month())
+            transactions = client.list_transactions(plan_id, start_date, end_date, limit=10)
+        return daily_checkin_summary(accounts, categories, transactions)
+
+    return _tool_call(run)
+
+
+@mcp.tool
+def spending_by_category(
+    plan_id: str = "default",
+    start_date: str | None = None,
+    end_date: str | None = None,
+) -> dict[str, Any]:
+    """Group current-month spending by category unless explicit dates are provided."""
+
+    def run() -> dict[str, Any]:
+        resolved_start, resolved_end = _resolve_dates(start_date, end_date)
+        with _client() as client:
+            transactions = client.list_transactions(plan_id, resolved_start, resolved_end, limit=500)
+        return spending_by_category_summary(transactions)
+
+    return _tool_call(run)
+
+
+@mcp.tool
+def spending_by_payee(
+    plan_id: str = "default",
+    start_date: str | None = None,
+    end_date: str | None = None,
+) -> dict[str, Any]:
+    """Group current-month spending by payee unless explicit dates are provided."""
+
+    def run() -> dict[str, Any]:
+        resolved_start, resolved_end = _resolve_dates(start_date, end_date)
+        with _client() as client:
+            transactions = client.list_transactions(plan_id, resolved_start, resolved_end, limit=500)
+        return spending_by_payee_summary(transactions)
+
+    return _tool_call(run)
+
+
+@mcp.tool
+def largest_transactions(
+    plan_id: str = "default",
+    start_date: str | None = None,
+    end_date: str | None = None,
+    limit: int = 10,
+) -> dict[str, Any]:
+    """Return the largest outflow transactions in the selected date window."""
+
+    def run() -> dict[str, Any]:
+        resolved_start, resolved_end = _resolve_dates(start_date, end_date)
+        with _client() as client:
+            transactions = client.list_transactions(plan_id, resolved_start, resolved_end, limit=500)
+        return largest_transactions_summary(transactions, limit=limit)
 
     return _tool_call(run)
 
