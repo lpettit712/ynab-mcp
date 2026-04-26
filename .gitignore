@@ -1,4 +1,7 @@
 .env
+.idea/
+CLAUDE_HANDOFF.md
+MORNING_BRIEFING.md
 .venv/
 __pycache__/
 *.py[cod]
